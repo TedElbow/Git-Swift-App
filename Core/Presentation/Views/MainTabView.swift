@@ -4,18 +4,16 @@ import SwiftUI
 /// Layout follows the same fullscreen discipline as IOS-RoosterVault (GeometryReader, explicit
 /// background frames, Spacer-based centering). Theme colors/gradients come from the design pass.
 struct MainTabView: View {
-    @StateObject private var habitsViewModel: HabitsViewModel
-
-    init() {
-        _habitsViewModel = StateObject(
-            wrappedValue: HabitsViewModel(store: UserDefaultsHabitStore())
-        )
-    }
+    @Environment(\.dependencyContainer) private var dependencyContainer
+    @StateObject private var fallbackTimerSessionStore = InMemoryTimerSessionStore()
 
     var body: some View {
+        let timerSessionStore = dependencyContainer?.timerSessionStore ?? fallbackTimerSessionStore
+
         GeometryReader { geometry in
             let w = geometry.size.width
             let h = geometry.size.height
+
             ZStack {
                 GameThemePalette.skyBackgroundGradient
                     .frame(width: w, height: h)
@@ -23,14 +21,18 @@ struct MainTabView: View {
 
                 TabView {
                     NavigationStack {
-                        TodayHabitsScreen(viewModel: habitsViewModel)
+                        TimerScreen(
+                            viewModel: TimerViewModel(timerSessionStore: timerSessionStore)
+                        )
                     }
                     .tabItem {
-                        Label("Today", systemImage: "sun.max.fill")
+                        Label("Timer", systemImage: "timer")
                     }
 
                     NavigationStack {
-                        HistoryScreen(viewModel: HistoryViewModel(timerSessionStore: timerSessionStore))
+                        HistoryScreen(
+                            viewModel: HistoryViewModel(timerSessionStore: timerSessionStore)
+                        )
                     }
                     .tabItem {
                         Label("History", systemImage: "clock.arrow.circlepath")
@@ -39,14 +41,7 @@ struct MainTabView: View {
                 .tint(GameThemePalette.chickenGoldenYellow)
                 .toolbarBackground(.visible, for: .tabBar)
                 .toolbarBackground(
-                    LinearGradient(
-                        colors: [
-                            GameThemePalette.chickenSkyTop.opacity(0.95),
-                            GameThemePalette.chickenSkyBlue.opacity(0.86)
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    ),
+                    GameThemePalette.chickenSkyTop.opacity(0.92),
                     for: .tabBar
                 )
                 .toolbarColorScheme(.dark, for: .tabBar)
