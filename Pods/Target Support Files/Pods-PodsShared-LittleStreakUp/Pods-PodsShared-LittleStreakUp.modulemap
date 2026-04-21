@@ -1,0 +1,6 @@
+framework module Pods_PodsShared_LittleStreakUp {
+  umbrella header "Pods-PodsShared-LittleStreakUp-umbrella.h"
+
+  export *
+  module * { export * }
+}
